@@ -7,6 +7,9 @@ use LaravelEagleSearch\Exceptions\SearchablePropertyNotFoundException;
 
 trait EagleSearchTrait
 {
+    private bool $firstOrOperatorActivated = false;
+    private bool $firstOrOperatorForRelationActivated = false;
+
     /**
      * Scope a query for set filters
      *
@@ -16,13 +19,30 @@ trait EagleSearchTrait
     public function scopeSetFilters(Builder $query)
     {
         $searchableFields = $this->getFieldsNameRequiredForSearch();
+
         foreach ($searchableFields as $searchableField) {
+
+            $this->addSearchConfigs($searchableField);
+
             if (preg_match('/\./', $searchableField['key'])) {
                 $this->inRelationSearch($query, $searchableField);
             } else {
                 $this->directSearch($query, $searchableField);
             }
         }
+    }
+
+    /**
+     * @param $searchableField
+     * @return void
+     */
+    private function addSearchConfigs(&$searchableField): void
+    {
+        $searchValueAndConfig = explode('<:>', $searchableField['value']);
+        $searchableField['value'] = $searchValueAndConfig[1];
+        $searchOperatorAndType = explode('|', $searchValueAndConfig[0]);
+        $searchableField['searchOperator'] = $searchOperatorAndType[0];
+        $searchableField['searchType'] = $searchOperatorAndType[1];
     }
 
     /**
@@ -57,7 +77,8 @@ trait EagleSearchTrait
 
     private function directSearch(Builder $query, $fieldRequestedFilter)
     {
-        $query->where($fieldRequestedFilter['key'], $fieldRequestedFilter['value']);
+        $this->registerFilterInQueryBuilder($query, $fieldRequestedFilter);
+//        $query->where($fieldRequestedFilter['key'], $fieldRequestedFilter['value']);
     }
 
     private function inRelationSearch(Builder $query, $fieldRequestedFilter)
@@ -70,5 +91,37 @@ trait EagleSearchTrait
         $query->whereHas($relation, function (Builder $q) use ($dbColumn, $searchValue) {
             $q->where($dbColumn, $searchValue);
         });
+    }
+
+    private function sqlEqualWhere(Builder $query, string $operator, string $fieldName, string $value)
+    {
+        if ($operator == '&') {
+            $query->where($fieldName, '=', $value);
+        }
+    }
+
+    private function sqlEqualWhereIn(Builder $query, string $operator, string $fieldName, string $value)
+    {
+        $sqlValues = explode(',', $value);
+        if ($operator == '&') {
+            $query->whereIn($fieldName, $sqlValues);
+        }
+    }
+
+    private function registerFilterInQueryBuilder(Builder $query, $fieldRequestedFilter)
+    {
+        $whereOperator = $fieldRequestedFilter['searchOperator'];
+        $fieldName = $fieldRequestedFilter['key'];
+        $value = $fieldRequestedFilter['value'];
+
+        switch ($fieldRequestedFilter['searchType']) {
+            case 'equal':
+                $this->sqlEqualWhere($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'in':
+                $this->sqlEqualWhereIn($query, $whereOperator, $fieldName, $value);
+            default:
+                break;
+        }
     }
 }
