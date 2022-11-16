@@ -1,0 +1,19 @@
+{
+    "name": "devazizi/laravel-eagle-search",
+    "type": "library",
+    "description": "searching tools for laravel app",
+    "keywords": ["eagleSearch", "laravel", "orm", "filters"],
+    "license": "MIT",
+    "version": "1.0.0",
+    "require": {
+
+    },
+    "require-dev": {
+
+    },
+    "autoload": {
+        "psr-4": {
+            "LaravelEagleSearch\\": "src/"
+        }
+    }
+}
