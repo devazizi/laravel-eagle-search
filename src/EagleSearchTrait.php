@@ -15,6 +15,7 @@ trait EagleSearchTrait
      *
      * @param Builder $query
      * @return void
+     * @throws SearchablePropertyNotFoundException
      */
     public function scopeSetFilters(Builder $query)
     {
