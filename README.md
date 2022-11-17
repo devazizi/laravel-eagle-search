@@ -87,8 +87,9 @@ return \App\Models\Account::query()->setFilters()->setOrders()->get();
 ``
 
 add your required fields for sorting as query string
+
 ``
-localhost:8000/api/search?orders[id]=desc&orders[balance]=asc
+http://example.local:8000/api/search?orders[id]=desc&orders[balance]=asc
 ``
 
 
