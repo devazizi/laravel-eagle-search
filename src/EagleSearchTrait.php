@@ -58,9 +58,12 @@ trait EagleSearchTrait
         }
     }
 
+    /**
+     * @throws SearchablePropertyNotFoundException
+     */
     private function getFieldsNameRequiredForSearch(): array
     {
-        $filtersNameInRequest = request()->get('filters');
+        $filtersNameInRequest = request()->get('filters', []);
         $entitySearchableFields = $this->getSearchSearchableFieldsList();
         $validatedFields = [];
 
@@ -78,7 +81,6 @@ trait EagleSearchTrait
     private function directSearch(Builder $query, $fieldRequestedFilter)
     {
         $this->registerFilterInQueryBuilder($query, $fieldRequestedFilter);
-//        $query->where($fieldRequestedFilter['key'], $fieldRequestedFilter['value']);
     }
 
     private function inRelationSearch(Builder $query, $fieldRequestedFilter)
@@ -89,7 +91,8 @@ trait EagleSearchTrait
         $searchValue = $fieldRequestedFilter['value'];
 
         $query->whereHas($relation, function (Builder $q) use ($dbColumn, $searchValue) {
-            $q->where($dbColumn, $searchValue);
+//            $q->where($dbColumn, $searchValue);
+//            $this->registerFilterInQueryBuilder($query, );
         });
     }
 
@@ -108,6 +111,74 @@ trait EagleSearchTrait
         }
     }
 
+    private function sqlEqualWhereNotIn(Builder $query, string $operator, string $fieldName, string $value)
+    {
+        $sqlValues = explode(',', $value);
+        if ($operator == '&') {
+            $query->whereNotIn($fieldName, $sqlValues);
+        }
+    }
+
+    private function sqlEqualBetween(Builder $query, string $operator, string $fieldName, $value)
+    {
+        if ($operator == '&') {
+            $query->whereBetween($fieldName, explode(',', $value));
+        }
+    }
+
+    private function sqlNotBetween(Builder $query, string $operator, string $fieldName, $value)
+    {
+        if ($operator == '&') {
+            $query->whereNotBetween($fieldName, explode(',', $value));
+        }
+    }
+
+    private function sqlNull(Builder $query, string $operator, string $fieldName)
+    {
+        if ($operator == '&') {
+            $query->whereNull($fieldName);
+        }
+    }
+
+    private function sqlNotNull(Builder $query, string $operator, string $fieldName)
+    {
+        if ($operator == '&') {
+            $query->whereNotNull($fieldName);
+        }
+    }
+
+    # gt
+    private function sqlGreaterThen(Builder $query, string $operator, string $fieldName, $value)
+    {
+        if ($operator == '&') {
+            $query->where($fieldName, '>', $value);
+        }
+    }
+
+    # gte
+    private function sqlGreaterThenEqual(Builder $query, string $operator, string $fieldName, $value)
+    {
+        if ($operator == '&') {
+            $query->where($fieldName, '>=', $value);
+        }
+    }
+
+    # lt
+    private function sqlLessThen(Builder $query, string $operator, string $fieldName, $value)
+    {
+        if ($operator == '&') {
+            $query->where($fieldName, '<', $value);
+        }
+    }
+
+    # lte
+    private function sqlLessThenEqual(Builder $query, string $operator, string $fieldName, $value)
+    {
+        if ($operator == '&') {
+            $query->where($fieldName, '<=', $value);
+        }
+    }
+
     private function registerFilterInQueryBuilder(Builder $query, $fieldRequestedFilter)
     {
         $whereOperator = $fieldRequestedFilter['searchOperator'];
@@ -120,6 +191,34 @@ trait EagleSearchTrait
                 break;
             case 'in':
                 $this->sqlEqualWhereIn($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'not_in':
+                $this->sqlEqualWhereNotIn($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'between':
+                $this->sqlEqualBetween($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'not_between':
+                $this->sqlNotBetween($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'null':
+                $this->sqlNull($query, $whereOperator, $fieldName);
+                break;
+            case 'not_null':
+                $this->sqlNotNull($query, $whereOperator, $fieldName);
+                break;
+            case 'lte':
+                $this->sqlLessThenEqual($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'lt':
+                $this->sqlLessThen($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'gt':
+                $this->sqlGreaterThen($query, $whereOperator, $fieldName, $value);
+                break;
+            case 'gte':
+                $this->sqlGreaterThenEqual($query, $whereOperator, $fieldName, $value);
+                break;
             default:
                 break;
         }
