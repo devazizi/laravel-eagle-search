@@ -7,6 +7,9 @@ use LaravelEagleSearch\Exceptions\OrderablePropertyNotFoundException;
 
 trait EagleOrderTrait
 {
+    /**
+     * @throws OrderablePropertyNotFoundException
+     */
     public function scopeSetOrders(Builder $query)
     {
         $fields = $this->checkOrderableColumns();
