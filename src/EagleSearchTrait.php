@@ -101,6 +101,13 @@ trait EagleSearchTrait
         }
     }
 
+    private function sqlNotEqualWhere(Builder $query, string $operator, string $fieldName, string $value)
+    {
+        if ($operator == '&') {
+            $query->where($fieldName, '!=', $value);
+        }
+    }
+
     private function sqlEqualWhereIn(Builder $query, string $operator, string $fieldName, string $value)
     {
         $sqlValues = explode(',', $value);
@@ -186,6 +193,9 @@ trait EagleSearchTrait
         switch ($fieldRequestedFilter['searchType']) {
             case 'eq':
                 $this->sqlEqualWhere($query, $whereOperator, $fieldName, $value);
+                break;
+            case '!eq':
+                $this->sqlNotEqualWhere($query, $whereOperator, $fieldName, $value);
                 break;
             case 'in':
                 $this->sqlEqualWhereIn($query, $whereOperator, $fieldName, $value);

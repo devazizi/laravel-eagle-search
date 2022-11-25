@@ -102,6 +102,7 @@ http://example.local:8000/api/search?orders[id]=desc&orders[balance]=asc
 | in sql      | eagle search | description           |
 |-------------|--------------|-----------------------|
 | =           | eq           ||
+| !=          | !eq          |                       |
 | in          | in           ||
 | not in      | !in          ||
 | between     | btw          ||
