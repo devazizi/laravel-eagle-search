@@ -2,12 +2,14 @@
 
 ### what is Laravel Eagle Search 🤔 . eagle search library help you to filters your data and order your data easily
 
-How to install it 
+How to install it
 
 ```
 composer require devazizi/laravel-eagle-search
 ```
+
 add **EagleSearchTrait** to your models
+
 ```
 <?php
 
@@ -37,17 +39,19 @@ class Account extends Model
 ```
 
 know your model prepared to filter data you most add **setFilters** method into in your query
+
 ```
 return \App\Models\Account::query()->setFilters()->get();
 ```
 
-##know how i can filter response data?
+## know how i can filter response data?
 
 ```
 http://example.local:8000/api/accounts?filters[balance]=&|in<:>955300,2121500
 ```
 
 # for orders columns. How you can this 😉, add EagleOrderTrait trait in your models
+
 ```
 <?php
 
@@ -80,7 +84,8 @@ class Account extends Model
     }
 }
 ```
-####after adding EagleOrderTrait in your model you can use setOrders methods in your queries 
+
+#### after adding EagleOrderTrait in your model you can use setOrders methods in your queries
 
 ``
 return \App\Models\Account::query()->setFilters()->setOrders()->get();
@@ -92,7 +97,18 @@ add your required fields for sorting as query string
 http://example.local:8000/api/search?orders[id]=desc&orders[balance]=asc
 ``
 
+# table of searching facilities
 
-
-
-
+| in sql      | eagle search | description           |
+|-------------|--------------|-----------------------|
+| =           | eq           ||
+| in          | in           ||
+| not in      | !in          ||
+| between     | btw          ||
+| not between | !btw         ||
+| is null     | nil          ||
+| is not null | !nil         ||
+|             | gte          | greater or equal than |
+|             | gt           | greater than          |
+|             | lte          | less or equal than    |
+|             | lt           | less than             |

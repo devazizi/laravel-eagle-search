@@ -88,12 +88,9 @@ trait EagleSearchTrait
     {
         $pathToField = explode('.', $fieldRequestedFilter['key']);
         $relation = implode('.', array_slice($pathToField, 0, count($pathToField) - 1));
-        $dbColumn = end($pathToField);
-        $searchValue = $fieldRequestedFilter['value'];
 
-        $query->whereHas($relation, function (Builder $q) use ($dbColumn, $searchValue) {
-//            $q->where($dbColumn, $searchValue);
-//            $this->registerFilterInQueryBuilder($query, );
+        $query->whereHas($relation, function (Builder $query) use ($fieldRequestedFilter) {
+            $this->registerFilterInQueryBuilder($query, $fieldRequestedFilter);
         });
     }
 
@@ -187,25 +184,25 @@ trait EagleSearchTrait
         $value = $fieldRequestedFilter['value'];
 
         switch ($fieldRequestedFilter['searchType']) {
-            case 'equal':
+            case 'eq':
                 $this->sqlEqualWhere($query, $whereOperator, $fieldName, $value);
                 break;
             case 'in':
                 $this->sqlEqualWhereIn($query, $whereOperator, $fieldName, $value);
                 break;
-            case 'not_in':
+            case '!in':
                 $this->sqlEqualWhereNotIn($query, $whereOperator, $fieldName, $value);
                 break;
-            case 'between':
+            case 'bwn':
                 $this->sqlEqualBetween($query, $whereOperator, $fieldName, $value);
                 break;
-            case 'not_between':
+            case '!bwn':
                 $this->sqlNotBetween($query, $whereOperator, $fieldName, $value);
                 break;
-            case 'null':
+            case 'nil':
                 $this->sqlNull($query, $whereOperator, $fieldName);
                 break;
-            case 'not_null':
+            case '!nil':
                 $this->sqlNotNull($query, $whereOperator, $fieldName);
                 break;
             case 'lte':
